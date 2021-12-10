@@ -13,7 +13,7 @@ const SAMPLE_CONFIG = JSON.stringify(<SteelshardsConfig> {
     inputs: "contracts/",
     outputs: {
         json: "dist/json/",
-        ts: "ts/interfaces/"
+        ts: "ts/generated/"
     },
     codeGenerationTarget: "none"
 }, null, 4);
@@ -30,7 +30,7 @@ const TSCONFIG = JSON.stringify({
 const GIT_IGNORES = [
     "/node_modules",
     "/dist",
-    "/ts/interfaces"
+    "/ts/generated"
 ];
 
 const SAMPLE_CONTRACT = [
@@ -56,7 +56,7 @@ export function SetupProject() {
     }
 
     fs.mkdirSync("contracts/", { recursive: true });
-    fs.mkdirSync("ts/interfaces/", { recursive: true });
+    fs.mkdirSync("ts/generated/", { recursive: true });
     fs.writeFileSync("contracts/MyContract.sol", SAMPLE_CONTRACT, { encoding: "utf-8" });
     fs.writeFileSync("steelshards.json", SAMPLE_CONFIG, { encoding: "utf-8" });
     fs.writeFileSync("tsconfig.json", TSCONFIG, { encoding: "utf-8" });
