@@ -19,7 +19,7 @@ steelshards build
 - REPL console
 
 ## Requirements
-- Native Solidity compiler (must be installed system-wide)
+- Solidity compiler (must be installed system-wide)
 - NodeJS 15 or higher
 
 ## FAQ
