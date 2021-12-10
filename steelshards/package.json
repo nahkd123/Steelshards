@@ -1,0 +1,22 @@
+{
+  "name": "@steelshards/steelshards",
+  "version": "1.0.0",
+  "description": "Steelshards",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "node dist/test.js"
+  },
+  "keywords": [
+    "eth",
+    "solidity",
+    "steelshards"
+  ],
+  "author": "nahkd123",
+  "license": "GPL-3.0-or-later",
+  "devDependencies": {
+    "@types/node": "^16.11.12"
+  },
+  "dependencies": {
+    "ethers": "^5.5.2"
+  }
+}
