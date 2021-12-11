@@ -87,7 +87,7 @@ export namespace EthersJSTSConverter {
             `    }`,
             ``,
             ...abi.filter(v => v.type == "function").map((v: JsonABIFunction) => {
-                let functionInputs = v.inputs.map(v => v.name + ": " + ABITypeScriptConverter.convertField(v, abiOpt));
+                let functionInputs = v.inputs.map((v, i) => (v.name || "arg" + i) + ": " + ABITypeScriptConverter.convertField(v, abiOpt));
                 functionInputs.push("overrides?: ethers.Overrides");
                 let functionCallInputs = v.inputs.map(v => v.name);
 
@@ -104,14 +104,15 @@ export namespace EthersJSTSConverter {
                     if (realType == "address" || realType == "account") return "string";
                     return realType;
                 }
-                function convertABIForMapping(v: ABIInput) {
+                function convertABIForMapping(v: ABIInput, i: number) {
+                    const argName = v.name || ("arg" + i);
                     const isArr = v.type.endsWith("[]");
                     const realType = isArr? v.type.substring(0, v.type.length - 2) : v.type;
                     if (isArr) return `    [],`;
                     if (realType == "tuple") return `    [${(v as ABITupleField).components.map(convertABIForMapping).join(", ")}],`;
-                    if (realType.startsWith("uint") || realType.startsWith("int")) return `    ethers.BigNumber.from(${v.name}),`;
-                    if (realType == "string" || realType == "address") return `    ${v.name},`;
-                    return `    ${v.name}, /* ${v.type} */`;
+                    if (realType.startsWith("uint") || realType.startsWith("int")) return `    ethers.BigNumber.from(${argName}),`;
+                    if (realType == "string" || realType == "address") return `    ${argName},`;
+                    return `    ${argName}, /* ${v.type} */`;
                 }
                 if (v.stateMutability == "view" || v.stateMutability == "pure") {
                     // Read only - Return values anyways
