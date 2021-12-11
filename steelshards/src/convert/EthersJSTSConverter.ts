@@ -47,6 +47,8 @@ export namespace EthersJSTSConverter {
         let ctorDeployCallInputs = ctor.inputs.map(v => v.name);
         ctorInputs.push("signer?: ethers.Signer");
 
+        let generatedFunctionNames: string[] = [];
+
         return [
             `// Steelshards Generated Code`,
             `// Edits made in this file will be reverted when you compile your contract,`,
@@ -87,6 +89,13 @@ export namespace EthersJSTSConverter {
             `    }`,
             ``,
             ...abi.filter(v => v.type == "function").map((v: JsonABIFunction) => {
+                let funcName = v.name;
+                if (generatedFunctionNames.includes(funcName)) {
+                    let counter = 0;
+                    while (generatedFunctionNames.includes(funcName = v.name + counter)) counter++;
+                }
+                generatedFunctionNames.push(funcName);
+
                 let functionInputs = v.inputs.map((v, i) => (v.name || "arg" + i) + ": " + ABITypeScriptConverter.convertField(v, abiOpt));
                 functionInputs.push("overrides?: ethers.Overrides");
                 let functionCallInputs = v.inputs.map(v => v.name);
@@ -102,6 +111,7 @@ export namespace EthersJSTSConverter {
                     }
                     if (realType.startsWith("uint") || realType.startsWith("int")) return "bigint";
                     if (realType == "address" || realType == "account") return "string";
+                    if (realType == "bool") return "boolean";
                     return realType;
                 }
                 function convertABIForMapping(v: ABIInput, i: number) {
@@ -139,7 +149,7 @@ export namespace EthersJSTSConverter {
                         `);`
                     ];
                 }
-                return `async ${v.name}(\n        ${functionInputs.join(",\n        ")}\n    ): Promise<${returnValue || "void"}> {\n${body.map(v => `        ` + v).join("\n")}\n    }`;
+                return `async ${funcName}(\n        ${functionInputs.join(",\n        ")}\n    ): Promise<${returnValue || "void"}> {\n${body.map(v => `        ` + v).join("\n")}\n    }`;
             }).map(v => `    ${v}\n`),
             `}`,
             ``,
