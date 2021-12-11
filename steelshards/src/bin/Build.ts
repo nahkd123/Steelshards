@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { ABITypeScriptConverter } from "..";
 import { EthersJSTSConverter } from "../convert/EthersJSTSConverter";
+import { BuildError } from "../errors/BuildError";
 import { Solc } from "../solc-native/Solc";
 import { CLI } from "./CLI";
 
@@ -35,6 +36,7 @@ function findImports(code: string, dir: string, inputMapping: string, solcInput:
         if (solcInput.sources[mappedFilePath]) return;
         solcInput.sources[mappedFilePath] = { content: "// No Source" };
 
+        if (!fs.existsSync(realFilePath)) throw new BuildError("Error while resolving imports: File not found: " + realFilePath, null);
         let fileContents = fs.readFileSync(realFilePath, "utf-8");
         fileContents = findImports(fileContents, path.join(realFilePath, ".."), path.join(mappedFilePath, "..").replaceAll("\\", "/"), solcInput);
         solcInput.sources[mappedFilePath] = { content: fileContents };
@@ -83,7 +85,15 @@ export async function Build(noEmit = false) {
             }
         }
     };
-    insertSources(config.inputs, "", solcInput);
+    try {
+        insertSources(config.inputs, "", solcInput);
+    } catch (e) {
+        if (e instanceof BuildError) {
+            CLI.error(e.message);
+            if (e.sourceFile) CLI.error(`-> ${e.sourceFile}`);
+            return;
+        } else throw e;
+    }
 
     CLI.info("Compiling...");
     let compileResult: Solc.CompilerOutput = await Solc.compile(solcInput);
