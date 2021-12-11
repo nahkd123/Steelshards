@@ -30,6 +30,8 @@ async function main() {
         case "networks": Networks(); return;
         case "console":
         case "repl": Repl(); return;
+        case "screenshotnfts":
+        case "screenshotnft": CLI.println("ಠ_ಠ"); return;
         default: CLI.error(`Unknown subcommand: ${subcommand}`); return;
     }
 }
