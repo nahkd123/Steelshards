@@ -100,11 +100,43 @@ export async function Build(noEmit = false) {
     let errorTriggered = false;
     if (compileResult.errors) compileResult.errors.forEach(err => {
         if (err.message.length > 250) err.message = err.message.substring(0, 250) + "...";
+        const srcLoc = err.sourceLocation? err.sourceLocation.file : "contract";
+        function findLines(): [number, string][] {
+            const start = err.sourceLocation.start;
+            const end = err.sourceLocation.end;
+            const source = solcInput.sources[err.sourceLocation.file].content;
+            if (start == -1 || end == -1) return [];
+            
+            function findLine(l: number): number {
+                let src = source.split("\n");
+                let idx = 0;
+                while (l > src[idx].length) {
+                    l -= src[idx].length + 1;
+                    idx++;
+                }
+                return idx;
+            }
+
+            const startLine = findLine(start);
+            const endLine = findLine(end);
+            let out: [number, string][] = [];
+            let src = source.split("\n").map(v => v.trim());
+            for (let i = startLine; i <= endLine; i++) {
+                const line = src[i];
+                out.push([i + 1, line]);
+            }
+            return out;
+        }
+        const srcTarget = err.sourceLocation? findLines() : null;
+
         if (err.severity == "error") {
             errorTriggered = true;
-            CLI.error("Error while compiling " + (err.sourceLocation?.file ?? "contract") + ": " + err.message);
+            CLI.error("Error while compiling " + srcLoc + ": " + err.message);
         }
-        if (err.severity == "warning") CLI.warn("Warning while compiling " + (err.sourceLocation?.file ?? "contract") + ": " + err.message);
+        if (err.severity == "warning") CLI.warn("Warning while compiling " + srcLoc + ": " + err.message);
+        if (srcTarget) srcTarget.forEach(v => {
+            CLI.println(` \x1b[96m${v[0].toString().padStart(3, " ")} \x1b[90m| \x1b[0m${v[1]}`);
+        });
     });
     if (errorTriggered) return;
 
