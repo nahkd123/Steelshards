@@ -31,9 +31,12 @@ function findImports(code: string, dir: string, inputMapping: string, solcInput:
             mappedFilePath = path.join(inputMapping, source).replaceAll("\\", "/");
         }
 
+        code = code.replaceAll(sourceStatement, `import "${mappedFilePath}";`);
+        if (solcInput.sources[mappedFilePath]) return;
+        solcInput.sources[mappedFilePath] = { content: "// No Source" };
+
         let fileContents = fs.readFileSync(realFilePath, "utf-8");
         fileContents = findImports(fileContents, path.join(realFilePath, ".."), path.join(mappedFilePath, "..").replaceAll("\\", "/"), solcInput);
-        code = code.replaceAll(sourceStatement, `import "${mappedFilePath}";`);
         solcInput.sources[mappedFilePath] = { content: fileContents };
 
     });
