@@ -96,11 +96,13 @@ export namespace EthersJSTSConverter {
                 function convertABIForReturn(abi: ABIField) {
                     const isArr = abi.type.endsWith("[]");
                     const realType = isArr? abi.type.substring(0, abi.type.length - 2) : abi.type;
+                    if (isArr) return convertABIForReturn(<any> { ...abi, type: realType }) + "[]";
                     if (realType == "tuple") {
                         return `[${(abi as ABITupleField).components.map(v => convertABIForReturn(v)).join(", ")}]`;
                     }
                     if (realType.startsWith("uint") || realType.startsWith("int")) return "bigint";
-                    return isArr? realType + "[]" : realType;
+                    if (realType == "address" || realType == "account") return "string";
+                    return realType;
                 }
                 function convertABIForMapping(v: ABIInput) {
                     const isArr = v.type.endsWith("[]");
