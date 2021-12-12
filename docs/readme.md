@@ -3,4 +3,4 @@ Thanks for choosing Steelshards for developing smart contracts. This project is 
 
 ## Table of Contents
 - [Getting Started](./getting_started.md)
-- Using Steelshards REPL
+- [Using Steelshards REPL](./using_steelshards_repl.md)
