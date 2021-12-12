@@ -136,8 +136,8 @@ export namespace EthersJSTSConverter {
                     body = [
                         `let result = await this.underlying.${v.name}(`,
                         ...v.inputs.map(convertABIForMapping),
-                        `    overrides`,
-                        `).map(mapOutput);`
+                        `    overrides || {}`,
+                        `)${ret.type == "tuple" || ret.type.endsWith("[]")? ".map(mapOutput)" : ""};`
                     ];
                     body.push(`return result;`);
                 } else {
@@ -145,7 +145,7 @@ export namespace EthersJSTSConverter {
                     body = [
                         `return await this.underlying.${v.name}(`,
                         ...v.inputs.map(convertABIForMapping),
-                        `    overrides`,
+                        `    overrides || {}`,
                         `);`
                     ];
                 }
